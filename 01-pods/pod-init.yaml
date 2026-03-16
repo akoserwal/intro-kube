@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-pod
+  labels:
+    app: init-demo
+spec:
+  initContainers:
+    - name: init-myservice
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Init container: preparing environment..."
+          echo "Waiting for dependencies..."
+          sleep 5
+          echo "Dependencies ready!"
+  containers:
+    - name: app
+      image: nginx:1.27
+      ports:
+        - containerPort: 80
