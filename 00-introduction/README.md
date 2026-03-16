@@ -133,4 +133,4 @@ kubectl get all -A
 
 ## Next Module
 
-Once you're comfortable with kubectl, proceed to [01-pods](../01-pods/).
+Once you're comfortable with kubectl, proceed to [01-nodes](../01-nodes/).
