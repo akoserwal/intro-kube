@@ -1,0 +1,112 @@
+# Frontend: prefers zone=us-east-1a (soft constraint)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: challenge-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: challenge-frontend
+  template:
+    metadata:
+      labels:
+        app: challenge-frontend
+        tier: frontend
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 80
+              preference:
+                matchExpressions:
+                  - key: zone
+                    operator: In
+                    values:
+                      - us-east-1a
+      containers:
+        - name: frontend
+          image: nginx:1.27
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+---
+# Backend: MUST run on tier=compute nodes (hard constraint)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: challenge-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: challenge-backend
+  template:
+    metadata:
+      labels:
+        app: challenge-backend
+        tier: backend
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: tier
+                    operator: In
+                    values:
+                      - compute
+      containers:
+        - name: backend
+          image: nginx:1.27
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+---
+# Database: must NOT share a node with other database Pods (anti-affinity)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: challenge-db
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: challenge-db
+  template:
+    metadata:
+      labels:
+        app: challenge-db
+        tier: database
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - challenge-db
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: db
+          image: postgres:16-alpine
+          env:
+            - name: POSTGRES_PASSWORD
+              value: challenge-password
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"

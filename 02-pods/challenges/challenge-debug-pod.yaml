@@ -1,0 +1,19 @@
+# This Pod has a problem. Diagnose and fix it.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-challenge
+spec:
+  containers:
+    - name: app
+      image: python:3.12-slim
+      command: ["python", "-c", "import http.server; http.server.HTTPServer(('', 8080), http.server.SimpleHTTPRequestHandler).serve_forever()"]
+      ports:
+        - containerPort: 8080
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "2Mi"
+        limits:
+          cpu: "100m"
+          memory: "4Mi"

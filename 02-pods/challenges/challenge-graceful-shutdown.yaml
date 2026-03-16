@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: graceful-pod
+spec:
+  terminationGracePeriodSeconds: 60
+  containers:
+    - name: app
+      image: nginx:1.27
+      ports:
+        - containerPort: 80
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 80
+        periodSeconds: 3
+        failureThreshold: 1
+      lifecycle:
+        preStop:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - |
+                echo "preStop: allowing endpoint removal (5s)..."
+                sleep 5
+                echo "preStop: sending quit signal to nginx..."
+                nginx -s quit
+                echo "preStop: waiting for connections to drain..."
+                while [ -f /var/run/nginx.pid ]; do sleep 1; done
+                echo "preStop: drain complete"
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "64Mi"
+        limits:
+          cpu: "100m"
+          memory: "128Mi"

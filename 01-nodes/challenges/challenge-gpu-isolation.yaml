@@ -1,0 +1,38 @@
+# Regular workload - no tolerations (should NOT land on GPU nodes)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: regular-workload
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "50m"
+        limits:
+          memory: "128Mi"
+          cpu: "100m"
+---
+# GPU workload - tolerates gpu=true:NoSchedule
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-workload
+spec:
+  tolerations:
+    - key: "gpu"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+  containers:
+    - name: gpu-app
+      image: nginx:1.27
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "50m"
+        limits:
+          memory: "128Mi"
+          cpu: "100m"

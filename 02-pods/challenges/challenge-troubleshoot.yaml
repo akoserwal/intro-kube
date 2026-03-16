@@ -1,0 +1,71 @@
+# Pod 1: Image problem
+apiVersion: v1
+kind: Pod
+metadata:
+  name: broken-image
+spec:
+  containers:
+    - name: app
+      image: nginx:nonexistent-version
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "64Mi"
+        limits:
+          cpu: "100m"
+          memory: "128Mi"
+---
+# Pod 2: Command problem
+apiVersion: v1
+kind: Pod
+metadata:
+  name: broken-command
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27
+      command: ["/bin/start-server"]
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "64Mi"
+        limits:
+          cpu: "100m"
+          memory: "128Mi"
+---
+# Pod 3: Configuration problem
+apiVersion: v1
+kind: Pod
+metadata:
+  name: broken-config
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27
+      envFrom:
+        - configMapRef:
+            name: nonexistent-config
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "64Mi"
+        limits:
+          cpu: "100m"
+          memory: "128Mi"
+---
+# Pod 4: Resource problem
+apiVersion: v1
+kind: Pod
+metadata:
+  name: broken-resources
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27
+      resources:
+        requests:
+          cpu: "100"
+          memory: "64Mi"
+        limits:
+          cpu: "100"
+          memory: "128Mi"

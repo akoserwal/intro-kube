@@ -1,0 +1,49 @@
+# Over-provisioned: requests far exceed actual usage
+apiVersion: v1
+kind: Pod
+metadata:
+  name: over-provisioned-pod
+  labels:
+    experiment: sizing
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.27
+      resources:
+        requests:
+          cpu: "2"
+          memory: "2Gi"
+        limits:
+          cpu: "2"
+          memory: "2Gi"
+---
+# Under-provisioned: will likely OOMKill
+apiVersion: v1
+kind: Pod
+metadata:
+  name: under-provisioned-pod
+  labels:
+    experiment: sizing
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.27
+      resources:
+        requests:
+          cpu: "1m"
+          memory: "4Mi"
+        limits:
+          cpu: "1m"
+          memory: "4Mi"
+---
+# No resources: BestEffort QoS, first to be evicted
+apiVersion: v1
+kind: Pod
+metadata:
+  name: no-resources-pod
+  labels:
+    experiment: sizing
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.27
