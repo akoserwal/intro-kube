@@ -1,0 +1,13 @@
+# Schedule directly on a specific node by name
+# Replace "minikube" with your actual node name
+apiVersion: v1
+kind: Pod
+metadata:
+  name: node-pinned-pod
+spec:
+  nodeName: minikube
+  containers:
+    - name: nginx
+      image: nginx:1.27
+      ports:
+        - containerPort: 80
